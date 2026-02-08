@@ -44,3 +44,6 @@ TAURUS (processed myeloid-only AnnData: `myeloid_final.h5ad`) with paired sample
 1) Decide final primary endpoint (MITO_ROS vs ROS vs OXPHOS) and finalize Figure 1 style.
 2) Add robustness checks (disease/site stratification; continuous scores vs percent-high).
 3) Select validation cohort and build validation runner to output the same TSV schema.
+
+### Interpretation (quick)
+In the TAURUS discovery cohort (32 paired subjects), the MITO_ROS-high fraction generally decreased from pre to post in both responders and nonresponders. Changes in this state did not track strongly with changes in the fraction of inflamed biopsies, suggesting the MITO/ROS program is not simply a proxy for inflammation status in this small sample. Mean ROS and mean OXPHOS module scores also shifted downward post-treatment, with larger decreases in the remission group.

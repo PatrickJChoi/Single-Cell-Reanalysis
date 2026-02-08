@@ -5,3 +5,7 @@ results/figures/*
 !results/tables/.gitkeep
 !results/figures/.gitkeep
 
+# local datasets (do not commit)
+data/
+*.h5ad
+*.h5ad.gz

@@ -68,3 +68,20 @@ If you already generated validation tables for **GSE298464**, place them under:
 
 `run_full.py` will generate validation figures **only if** the required TSV tables exist in that folder.
 
+## Environment setup (recommended)
+
+This repo uses a pinned conda-forge environment.
+
+1) Create the environment:
+
+    conda env create -f environment.yml
+
+2) Activate it:
+
+    conda activate scr_smoke
+
+3) Quick import check:
+
+    python -c "import numpy, pandas, scanpy, anndata; print('ok')"
+
+

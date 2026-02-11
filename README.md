@@ -1,3 +1,5 @@
+![smoke-test](https://github.com/crabbyPatty10/Single-Cell-Reanalysis/actions/workflows/smoke.yml/badge.svg)
+
 # Single-Cell Reanalysis
 
 ## Smoke test (end-to-end)

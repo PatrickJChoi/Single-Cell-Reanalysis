@@ -9,3 +9,8 @@ results/figures/*
 data/
 *.h5ad
 *.h5ad.gz
+
+# generated tables/figures (keep local)
+results/tables/validation_gse298464/
+results/tables/*.tsv
+results/figures/*.png

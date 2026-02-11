@@ -14,3 +14,7 @@ data/
 results/tables/validation_gse298464/
 results/tables/*.tsv
 results/figures/*.png
+
+# smoke test outputs (do not commit)
+outputs/
+reports/

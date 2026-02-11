@@ -1,0 +1,18 @@
+data:
+  input_path: data/raw/example.h5ad
+  output_h5ad: outputs/processed_smoke.h5ad
+
+qc:
+  min_genes: 50
+  min_counts: 100
+  max_mito_pct: 25
+  max_genes: 1000
+
+preprocess:
+  n_hvgs: 200
+  n_pcs: 15
+  leiden_resolution: 0.6
+  random_seed: 0
+
+reports:
+  out_dir: reports/smoke

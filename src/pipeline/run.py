@@ -75,6 +75,9 @@ def preprocess_and_cluster(adata, pp_cfg: dict, out_dir: str):
         adata,
         resolution=pp_cfg["leiden_resolution"],
         random_state=pp_cfg["random_seed"],
+        flavor="igraph",
+        n_iterations=2,
+        directed=False,
     )
 
     sc.pl.umap(adata, color=["leiden"], show=False)

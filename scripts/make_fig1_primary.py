@@ -55,7 +55,7 @@ def main():
             labels.append(f"{g.replace('_',' ')} (n={len(vals)})")
 
         # Use tick_labels to avoid matplotlib deprecation warning
-        ax.boxplot(data, tick_labels=labels, showfliers=True)
+        ax.boxplot(data, tick_labels=labels, showfliers=False)
 
         # Add jitter points (two default colors by plotting each group once)
         rng = np.random.default_rng(0)
@@ -68,7 +68,7 @@ def main():
         ax.set_title("TAURUS discovery: MITO/ROS state change by response")
     else:
         # Pooled: single box + points
-        ax.boxplot([y_all.values], tick_labels=["All subjects"], showfliers=True)
+        ax.boxplot([y_all.values], tick_labels=["All subjects"], showfliers=False)
         rng = np.random.default_rng(0)
         x = np.full(len(y_all.values), 1.0) + rng.normal(0, 0.05, size=len(y_all.values))
         ax.scatter(x, y_all.values, s=24, alpha=0.9)

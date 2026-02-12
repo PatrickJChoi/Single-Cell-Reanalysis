@@ -22,11 +22,11 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-!\[Fig 1: mito/ROS delta](assets/figures/fig1\_mito\_ros\_delta.png)
+![Fig 1: mito/ROS delta](assets/figures/fig1\_mito\_ros\_delta.png)
 
 
 
-\*\*Takeaways (discovery):\*\*
+**Takeaways (discovery):**
 
 \- We quantify \*\*within-subject change\*\* (post − baseline) to reduce between-person variability.
 
@@ -72,7 +72,7 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-\*\*Takeaways (discovery):\*\*
+**Takeaways (discovery):**
 
 \- These panels provide compact summaries of mean changes in ROS- and OXPHOS-related measures.
 
@@ -96,7 +96,7 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-\*\*Takeaways (validation):\*\*
+**Takeaways (validation):**
 
 \- The key mito/ROS pattern is evaluated in an independent dataset (GSE298464).
 
@@ -116,7 +116,7 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-\*\*Takeaways (validation):\*\*
+**Takeaways (validation):**
 
 \- The same paired-delta logic is applied to the validation cohort where pairing is available.
 

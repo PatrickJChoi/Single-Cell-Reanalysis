@@ -2,6 +2,10 @@
 
 # Single-Cell Reanalysis
 
+## Abstract
+
+This repo contains a reproducible single-cell reanalysis pipeline that quantifies **within-subject (post − baseline)** changes in myeloid immune programs and links them to clinical outcome. In the discovery cohort (n=34), subjects reaching **Remission** show larger paired decreases in **ROS**, **OXPHOS**, and **inflammatory response** signals than **Non_Remission**, consistent with immune-state normalization. The project includes an end-to-end smoke test (no private data), a one-command full runner, and documented Results/Methods with embedded figures.
+
 - Results: `docs/Results.md`
 - Methods: `docs/Methods.md`
 - Data acquisition: `docs/Data_Acquisition.md`

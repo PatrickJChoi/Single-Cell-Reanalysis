@@ -70,15 +70,33 @@ def main():
     ax.boxplot(data_non, positions=pos_non, widths=0.65, showfliers=False)
     ax.boxplot(data_rem, positions=pos_rem, widths=0.65, showfliers=False)
 
-    # Jitter points with different markers (no forced colors)
+        # Jitter points with different markers (no forced colors)
     rng = np.random.default_rng(0)
+
+    xs_non, ys_non = [], []
+    xs_rem, ys_rem = [], []
+
     for i in range(len(metrics)):
         if len(data_non[i]) > 0:
-            x = np.full(len(data_non[i]), pos_non[i]) + rng.normal(0, 0.06, size=len(data_non[i]))
-            ax.scatter(x, data_non[i], s=14, marker="o", alpha=0.9, label="Non_Remission" if i == 0 else None)
+            xs_non.append(np.full(len(data_non[i]), pos_non[i]) + rng.normal(0, 0.06, size=len(data_non[i])))
+            ys_non.append(data_non[i])
         if len(data_rem[i]) > 0:
-            x = np.full(len(data_rem[i]), pos_rem[i]) + rng.normal(0, 0.06, size=len(data_rem[i]))
-            ax.scatter(x, data_rem[i], s=14, marker="s", alpha=0.9, label="Remission" if i == 0 else None)
+            xs_rem.append(np.full(len(data_rem[i]), pos_rem[i]) + rng.normal(0, 0.06, size=len(data_rem[i])))
+            ys_rem.append(data_rem[i])
+
+    if xs_non:
+        ax.scatter(np.concatenate(xs_non), np.concatenate(ys_non), s=14, marker="o", alpha=0.9, label="Non_Remission")
+    if xs_rem:
+        ax.scatter(np.concatenate(xs_rem), np.concatenate(ys_rem), s=14, marker="s", alpha=0.9, label="Remission")
+
+    ax.axhline(0, linewidth=1)
+    ax.set_ylabel("Post − baseline (paired delta)")
+    ax.set_title(f"Discovery: paired deltas by response group (n={n_non} Non_Remission, n={n_rem} Remission)")
+
+    ax.set_xticks(centers)
+    ax.set_xticklabels([LABELS.get(m, m.replace("delta_", "")) for m in metrics], rotation=25, ha="right")
+
+    ax.legend(loc="best")
 
     ax.axhline(0, linewidth=1)
     ax.set_ylabel("Post − baseline (paired delta)")

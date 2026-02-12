@@ -1,4 +1,4 @@
-\# Methods (high-level)
+# Methods (high-level)
 
 
 
@@ -10,7 +10,7 @@ This document describes the analysis flow at a level suitable for readers who wa
 
 
 
-\## Overview
+## Overview
 
 
 
@@ -34,11 +34,11 @@ This document describes the analysis flow at a level suitable for readers who wa
 
 
 
-\## Inputs
+## Inputs
 
 
 
-\### Discovery (required for full run)
+### Discovery (required for full run)
 
 
 
@@ -50,7 +50,7 @@ This document describes the analysis flow at a level suitable for readers who wa
 
 
 
-\### Validation (optional)
+### Validation (optional)
 
 
 
@@ -68,11 +68,11 @@ Raw validation construction is supported by scripts but not run automatically.
 
 
 
-\## Key analysis choices
+## Key analysis choices
 
 
 
-\### Clustering and visualization (smoke test and/or exploratory steps)
+### Clustering and visualization (smoke test and/or exploratory steps)
 
 
 
@@ -88,7 +88,7 @@ Raw validation construction is supported by scripts but not run automatically.
 
 
 
-\### Biological scoring
+### Biological scoring
 
 
 
@@ -98,7 +98,7 @@ Raw validation construction is supported by scripts but not run automatically.
 
 
 
-\### Paired delta design (core result)
+### Paired delta design (core result)
 
 
 
@@ -122,7 +122,7 @@ This design emphasizes \*\*within-person change\*\*, reducing confounding from b
 
 
 
-\## Outputs
+## Outputs
 
 
 
@@ -146,7 +146,7 @@ Figures:
 
 
 
-\## Reproducibility
+## Reproducibility
 
 
 

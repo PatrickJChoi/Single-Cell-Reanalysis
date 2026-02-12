@@ -1,4 +1,4 @@
-\# Results
+# Results
 
 
 
@@ -14,11 +14,11 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-\## Discovery (primary)
+## Discovery (primary)
 
 
 
-\### Figure 1 — Paired within-subject changes
+### Figure 1 — Paired within-subject changes
 
 
 
@@ -40,7 +40,7 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-\### Figure 1b — Relationship to inflammation
+### Figure 1b — Relationship to inflammation
 
 
 
@@ -60,7 +60,7 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-\### Figure 1c–1d — Mean delta summaries
+### Figure 1c–1d — Mean delta summaries
 
 
 
@@ -84,11 +84,11 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-\## Validation (external)
+## Validation (external)
 
 
 
-\### Figure V1 — Validation cohort group comparison
+### Figure V1 — Validation cohort group comparison
 
 
 
@@ -108,7 +108,7 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-\### Figure V2 — Validation paired deltas
+### Figure V2 — Validation paired deltas
 
 
 
@@ -128,7 +128,7 @@ This page summarizes the key discovery results and the external validation.
 
 
 
-\## Where to find the underlying tables
+## Where to find the underlying tables
 
 
 

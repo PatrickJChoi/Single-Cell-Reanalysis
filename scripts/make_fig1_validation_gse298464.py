@@ -1,275 +1,267 @@
-#!/usr/bin/env python3
-"""
-Validation figures for GSE298464.
-
-Outputs:
-- results/figures/figV1_gse298464_mito_ros_by_group.png
-- results/figures/figV2_gse298464_mito_ros_delta.png
-"""
+from __future__ import annotations
 
 from pathlib import Path
+import shutil
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 
-VAL_DIR = Path("results/tables/validation_gse298464")
-OUTDIR = Path("results/figures")
+ROOT = Path(".")
+VALDIR = ROOT / "results" / "tables" / "validation_gse298464"
+OUTDIR = ROOT / "results" / "figures"
+DOCS_FIGDIR = ROOT / "docs" / "assets" / "figures"
+
 OUTDIR.mkdir(parents=True, exist_ok=True)
 
-SEED = 7  # deterministic jitter
+
+def _copy_to_docs(fig_path: Path) -> None:
+    if DOCS_FIGDIR.exists():
+        DOCS_FIGDIR.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(fig_path, DOCS_FIGDIR / fig_path.name)
 
 
-def _find_col(df: pd.DataFrame, candidates: list[str]) -> str | None:
-    lower = {c.lower(): c for c in df.columns}
-    for cand in candidates:
-        if cand.lower() in lower:
-            return lower[cand.lower()]
+def _jitter(n: int, width: float = 0.06) -> np.ndarray:
+    rng = np.random.default_rng(0)
+    return rng.uniform(-width, width, size=n)
+
+
+def _boxplot(ax, data, labels, **kwargs):
+    """Matplotlib 3.9 renamed labels -> tick_labels; keep compatible."""
+    try:
+        return ax.boxplot(data, tick_labels=labels, **kwargs)
+    except TypeError:
+        return ax.boxplot(data, labels=labels, **kwargs)
+
+
+def _pick_col(df: pd.DataFrame, prefer: list[str], contains: list[str] | None = None) -> str | None:
+    cols = list(df.columns)
+    low = {c.lower(): c for c in cols}
+
+    for p in prefer:
+        if p.lower() in low:
+            return low[p.lower()]
+
+    if contains:
+        for c in cols:
+            cl = c.lower()
+            if all(k in cl for k in contains):
+                return c
+
     return None
 
 
-def _jitter(x: float, n: int, scale: float = 0.06, seed: int = SEED) -> np.ndarray:
-    rng = np.random.default_rng(seed)
-    return x + rng.normal(0.0, scale, size=n)
+def _mode(series: pd.Series) -> str | None:
+    s = series.dropna().astype(str)
+    if s.empty:
+        return None
+    vc = s.value_counts()
+    return vc.index[0]
 
 
-def _normalize_response(s: pd.Series) -> pd.Series:
-    s2 = s.astype(str).str.strip()
-    # common aliases
-    s2 = s2.replace(
-        {
-            "NR": "Non_Remission",
-            "R": "Remission",
-            "Non-remission": "Non_Remission",
-            "Non Remission": "Non_Remission",
-            "Nonremission": "Non_Remission",
-            "Remission ": "Remission",
-        }
-    )
-    return s2
+def _norm_resp(x: str) -> str:
+    x = str(x).strip()
+    xl = x.lower()
+    if "non" in xl and "rem" in xl:
+        return "Non_Remission"
+    if xl.startswith("non"):
+        return "Non_Remission"
+    if "rem" in xl:
+        return "Remission"
+    return x
 
 
-def _normalize_timepoint(s: pd.Series) -> pd.Series:
-    s2 = s.astype(str).str.strip().str.lower()
-    s2 = s2.replace(
-        {
-            "baseline": "Pre",
-            "pre": "Pre",
-            "pretreatment": "Pre",
-            "before": "Pre",
-            "post": "Post",
-            "after": "Post",
-            "week14": "Post",
-            "week 14": "Post",
-        }
-    )
-    # capitalize Pre/Post
-    s2 = s2.replace({"pre": "Pre", "post": "Post"})
-    return s2
-
-
-def _proxy_legend(ax):
-    ax.scatter([], [], marker="o", label="Non_Remission")
-    ax.scatter([], [], marker="s", label="Remission")
-
-
-def make_v1():
+def make_v1() -> Path:
     """
-    V1: %MITO_ROS-high by response and timepoint (NR Pre, NR Post, R Pre, R Post)
-    Reads: results/tables/validation_gse298464/state_summary.tsv
+    V1: % MITO_ROS-high by response and timepoint (NR Pre, NR Post, R Pre, R Post)
+    Expects: state_summary.tsv with columns:
+      - response
+      - timepoint
+      - pct_high_MITO_ROS
     """
-    path = VAL_DIR / "state_summary.tsv"
+    path = VALDIR / "state_summary.tsv"
     if not path.exists():
         raise FileNotFoundError(f"Missing {path}")
 
     df = pd.read_csv(path, sep="\t")
 
-    col_response = _find_col(df, ["response"])
-    col_timepoint = _find_col(df, ["timepoint"])
-    col_metric = _find_col(df, ["pct_high_MITO_ROS", "pct_high_mito_ros"]) or _find_col(
-        df, ["pct_high_mito_ros"]
-    )
+    resp_col = _pick_col(df, prefer=["response"], contains=["response"])
+    tp_col = _pick_col(df, prefer=["timepoint"], contains=["timepoint"])
+    if resp_col is None or tp_col is None:
+        raise ValueError("state_summary.tsv must contain 'response' and 'timepoint' columns.")
 
-    if col_response is None or col_timepoint is None or col_metric is None:
-        raise ValueError(
-            "state_summary.tsv must contain columns for response, timepoint, and pct_high_MITO_ROS."
-        )
+    if "pct_high_MITO_ROS" not in df.columns:
+        raise ValueError("state_summary.tsv must contain 'pct_high_MITO_ROS' column.")
 
     df = df.copy()
-    df["response"] = _normalize_response(df[col_response])
-    df["timepoint"] = _normalize_timepoint(df[col_timepoint])
-    df["metric"] = pd.to_numeric(df[col_metric], errors="coerce")
+    df[resp_col] = df[resp_col].astype(str).map(_norm_resp)
+    df[tp_col] = df[tp_col].astype(str)
 
-    # keep only groups we expect
-    df = df[df["response"].isin(["Non_Remission", "Remission"])]
-    df = df[df["timepoint"].isin(["Pre", "Post"])]
-    df = df.dropna(subset=["metric"])
+    # shorten timepoint display
+    def tp_short(x: str) -> str:
+        xl = x.lower()
+        if "pre" in xl or "base" in xl:
+            return "Pre"
+        if "post" in xl or "wk" in xl or "week" in xl:
+            return "Post"
+        return x
 
-    order = [
-        ("Non_Remission", "Pre"),
-        ("Non_Remission", "Post"),
-        ("Remission", "Pre"),
-        ("Remission", "Post"),
-    ]
+    df["tp_short"] = df[tp_col].map(tp_short)
 
-    data = []
+    order = [("Non_Remission", "Pre"), ("Non_Remission", "Post"), ("Remission", "Pre"), ("Remission", "Post")]
     labels = []
+    data = []
+    grp_for_pts = []
+
     for r, t in order:
-        vals = df[(df["response"] == r) & (df["timepoint"] == t)]["metric"].to_numpy()
+        sub = df[(df[resp_col] == r) & (df["tp_short"] == t)]
+        vals = pd.to_numeric(sub["pct_high_MITO_ROS"], errors="coerce").dropna().to_numpy()
         data.append(vals)
-        short_r = "NR" if r == "Non_Remission" else "R"
-        labels.append(f"{short_r} {t} (n={len(vals)})")
+        short = "NR" if r == "Non_Remission" else "R"
+        labels.append(f"{short} {t} (n={len(vals)})")
+        grp_for_pts.append(r)
 
-    fig, ax = plt.subplots(figsize=(10, 7))
+    fig, ax = plt.subplots(figsize=(10.5, 6.5))
 
-    ax.boxplot(
-        data,
-        tick_labels=labels,
-        showfliers=False,  # no hollow circles
-        widths=0.6,
-    )
+    _boxplot(ax, data, labels, showfliers=False, widths=0.6)
 
-    # overlay points (jittered)
-    marker_map = {"Non_Remission": "o", "Remission": "s"}
-    color_map = {"Non_Remission": "tab:blue", "Remission": "tab:orange"}
-
-    for i, (r, t) in enumerate(order, start=1):
-        vals = df[(df["response"] == r) & (df["timepoint"] == t)]["metric"].to_numpy()
+    # overlay points
+    for i, (vals, r) in enumerate(zip(data, grp_for_pts), start=1):
         if len(vals) == 0:
             continue
-        xs = _jitter(float(i), len(vals), seed=SEED + i)
-        ax.scatter(
-            xs,
-            vals,
-            s=60,
-            marker=marker_map[r],
-            color=color_map[r],
-            alpha=0.95,
-            zorder=3,
-        )
+        x = np.full(len(vals), i, dtype=float) + _jitter(len(vals))
+        marker = "o" if r == "Non_Remission" else "s"
+        ax.scatter(x, vals, marker=marker, s=60, alpha=0.9, label=r if i == 1 or i == 3 else None)
 
-    _proxy_legend(ax)
-    ax.legend(loc="upper right", frameon=True)
-
-    ax.set_title("GSE298464 validation: % MITO_ROS-high by response and timepoint", fontsize=18, pad=16)
-    ax.set_ylabel("% MITO_ROS-high (myeloid)", fontsize=14)
-
+    ax.axhline(0, linewidth=1)
+    ax.set_ylabel("% MITO_ROS-high (myeloid)")
+    ax.set_title(
+        "GSE298464 validation: % MITO_ROS-high by response and timepoint\nPaired delta = post − baseline (see V2)",
+        fontsize=16,
+    )
     plt.tight_layout()
+
     outpath = OUTDIR / "figV1_gse298464_mito_ros_by_group.png"
-    fig.savefig(outpath, dpi=200)
+    fig.savefig(outpath, dpi=150)
     plt.close(fig)
-    print(f"Wrote: {outpath}")
+
+    _copy_to_docs(outpath)
+    return outpath
 
 
-def make_v2():
+def make_v2() -> Path:
     """
-    V2: paired delta (post - baseline) for %MITO_ROS-high, by response.
-    Reads:
-      - results/tables/validation_gse298464/paired_subject_deltas.tsv
-      - results/tables/validation_gse298464/state_summary.tsv (for response mapping by subject_id, if needed)
+    V2: Paired delta (post - baseline) of %MITO_ROS-high by response.
+    Expects: paired_subject_deltas.tsv with columns:
+      - subject_id
+      - delta_pct_high_MITO_ROS
+    If 'response' is missing, we infer it from state_summary.tsv and merge by subject_id.
     """
-    dpath = VAL_DIR / "paired_subject_deltas.tsv"
-    if not dpath.exists():
-        raise FileNotFoundError(f"Missing {dpath}")
+    deltas_path = VALDIR / "paired_subject_deltas.tsv"
+    if not deltas_path.exists():
+        raise FileNotFoundError(f"Missing {deltas_path}")
 
-    d = pd.read_csv(dpath, sep="\t")
+    df = pd.read_csv(deltas_path, sep="\t")
 
-    col_subj = _find_col(d, ["subject_id"])
-    col_delta = _find_col(d, ["delta_pct_high_MITO_ROS", "delta_pct_high_mito_ros"])
+    if "subject_id" not in df.columns:
+        raise ValueError("paired_subject_deltas.tsv must contain 'subject_id' for V2.")
 
-    if col_subj is None or col_delta is None:
-        raise ValueError("paired_subject_deltas.tsv must contain subject_id and delta_pct_high_MITO_ROS.")
+    if "delta_pct_high_MITO_ROS" not in df.columns:
+        raise ValueError("paired_subject_deltas.tsv must contain 'delta_pct_high_MITO_ROS' for V2.")
 
-    d = d.copy()
-    d["subject_id"] = d[col_subj].astype(str)
-    d["delta"] = pd.to_numeric(d[col_delta], errors="coerce")
+    df = df.copy()
 
-    # attach response if not already present
-    col_resp = _find_col(d, ["response"])
-    if col_resp is None:
-        spath = VAL_DIR / "state_summary.tsv"
-        if spath.exists():
-            s = pd.read_csv(spath, sep="\t")
-            s_col_subj = _find_col(s, ["subject_id"])
-            s_col_resp = _find_col(s, ["response"])
-            if s_col_subj is not None and s_col_resp is not None:
-                s = s.copy()
-                s["subject_id"] = s[s_col_subj].astype(str)
-                s["response"] = _normalize_response(s[s_col_resp])
-                # one response per subject (mode)
-                resp_map = (
-                    s.dropna(subset=["response"])
-                    .groupby("subject_id")["response"]
-                    .agg(lambda x: x.mode().iat[0] if len(x.mode()) else x.iloc[0])
-                    .reset_index()
-                )
-                d = d.merge(resp_map, on="subject_id", how="left")
-            else:
-                d["response"] = np.nan
+    # If response is missing, infer from state_summary.tsv
+    if "response" not in df.columns:
+        state_path = VALDIR / "state_summary.tsv"
+        if not state_path.exists():
+            raise ValueError("V2 needs 'response'. Add it to paired_subject_deltas.tsv or provide state_summary.tsv.")
+
+        st = pd.read_csv(state_path, sep="\t")
+
+        resp_col = _pick_col(st, prefer=["response"], contains=["response"])
+        subj_col = _pick_col(st, prefer=["subject_id"], contains=["subject", "id"])
+        if resp_col is None:
+            raise ValueError("state_summary.tsv must contain a response column to infer V2 groups.")
+
+        st = st.copy()
+        st[resp_col] = st[resp_col].astype(str).map(_norm_resp)
+
+        # Best case: state_summary has subject_id
+        if subj_col is not None:
+            st[subj_col] = st[subj_col].astype(str)
+            resp_map = (
+                st.groupby(subj_col)[resp_col]
+                .apply(_mode)
+                .dropna()
+                .rename("response")
+                .reset_index()
+                .rename(columns={subj_col: "subject_id"})
+            )
+            df["subject_id"] = df["subject_id"].astype(str)
+            df = df.merge(resp_map, on="subject_id", how="left")
         else:
-            d["response"] = np.nan
-    else:
-        d["response"] = _normalize_response(d[col_resp])
+            # Fallback: try to match subject_id as substring of sample_id
+            sample_col = _pick_col(st, prefer=["sample_id"], contains=["sample"])
+            if sample_col is None:
+                raise ValueError("Couldn't infer response: state_summary.tsv has no subject_id or sample_id-like column.")
 
-    d = d.dropna(subset=["delta"])
-    d = d[d["response"].isin(["Non_Remission", "Remission"])]
+            st[sample_col] = st[sample_col].astype(str)
+            df["subject_id"] = df["subject_id"].astype(str)
+
+            inferred = []
+            for sid in df["subject_id"].unique():
+                sub = st[st[sample_col].str.contains(sid, regex=False)]
+                inferred.append((sid, _mode(sub[resp_col])))
+
+            resp_map = pd.DataFrame(inferred, columns=["subject_id", "response"]).dropna()
+            df = df.merge(resp_map, on="subject_id", how="left")
+
+    # normalize response labels
+    df["response_norm"] = df["response"].map(_norm_resp) if "response" in df.columns else df["response_norm"].map(_norm_resp)
+
+    # drop subjects we still couldn't label
+    df = df.dropna(subset=["response_norm"])
 
     groups = ["Non_Remission", "Remission"]
     data = []
     labels = []
+
     for g in groups:
-        vals = d[d["response"] == g]["delta"].to_numpy()
+        vals = pd.to_numeric(df.loc[df["response_norm"] == g, "delta_pct_high_MITO_ROS"], errors="coerce").dropna().to_numpy()
         data.append(vals)
         labels.append(f"{g.replace('_',' ')} (n={len(vals)})")
 
-    fig, ax = plt.subplots(figsize=(10, 7))
+    fig, ax = plt.subplots(figsize=(10.5, 6.5))
 
-    ax.boxplot(
-        data,
-        tick_labels=labels,
-        showfliers=False,  # no hollow circles
-        widths=0.6,
-    )
+    _boxplot(ax, data, labels, showfliers=False, widths=0.6)
 
-    # overlay points
-    marker_map = {"Non_Remission": "o", "Remission": "s"}
-    color_map = {"Non_Remission": "tab:blue", "Remission": "tab:orange"}
-
-    for i, g in enumerate(groups, start=1):
-        vals = d[d["response"] == g]["delta"].to_numpy()
+    for i, (vals, g) in enumerate(zip(data, groups), start=1):
         if len(vals) == 0:
             continue
-        xs = _jitter(float(i), len(vals), seed=SEED + 100 + i)
-        ax.scatter(
-            xs,
-            vals,
-            s=60,
-            marker=marker_map[g],
-            color=color_map[g],
-            alpha=0.95,
-            zorder=3,
-        )
+        x = np.full(len(vals), i, dtype=float) + _jitter(len(vals))
+        marker = "o" if g == "Non_Remission" else "s"
+        ax.scatter(x, vals, marker=marker, s=70, alpha=0.9)
 
     ax.axhline(0, linewidth=1)
-    ax.set_title("GSE298464 validation: MITO_ROS state change by response", fontsize=18, pad=16)
-    ax.text(
-        0.5,
-        0.96,
-        "Paired delta = post − baseline",
-        transform=ax.transAxes,
-        ha="center",
-        va="top",
-        fontsize=14,
+    ax.set_ylabel("Δ(Post − Pre) % MITO_ROS-high (myeloid)")
+    ax.set_title(
+        "GSE298464 validation: MITO_ROS state change by response\nPaired delta = post − baseline",
+        fontsize=16,
     )
-    ax.set_ylabel("Δ(Post − Pre) % MITO_ROS-high (myeloid)", fontsize=14)
-
     plt.tight_layout()
+
     outpath = OUTDIR / "figV2_gse298464_mito_ros_delta.png"
-    fig.savefig(outpath, dpi=200)
+    fig.savefig(outpath, dpi=150)
     plt.close(fig)
-    print(f"Wrote: {outpath}")
+
+    _copy_to_docs(outpath)
+    return outpath
 
 
 if __name__ == "__main__":
-    make_v1()
-    make_v2()
+    p1 = make_v1()
+    p2 = make_v2()
+    print(f"Wrote: {p1}")
+    print(f"Wrote: {p2}")

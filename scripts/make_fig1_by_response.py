@@ -20,14 +20,14 @@ METRICS = [
     "delta_frac_inflamed",
 ]
 
-# Pretty labels for axis
+# Short labels for axis
 LABELS = {
-    "delta_pct_high_MITO_ROS": "MITO/ROS-high (%)",
-    "delta_mean_ROS": "ROS score",
-    "delta_mean_OXPHOS": "OXPHOS score",
-    "delta_mean_TNFA": "TNFA/NFkB score",
-    "delta_mean_INFLAM": "Inflammatory response",
-    "delta_frac_inflamed": "Frac. inflamed",
+    "delta_pct_high_MITO_ROS": "MITO/ROS-high",
+    "delta_mean_ROS": "ROS",
+    "delta_mean_OXPHOS": "OXPHOS",
+    "delta_mean_TNFA": "TNFA/NFkB",
+    "delta_mean_INFLAM": "Inflam",
+    "delta_frac_inflamed": "Frac inflamed",
 }
 
 GROUPS = ["Non_Remission", "Remission"]
@@ -54,8 +54,8 @@ def main():
         data_non.append(x_non)
         data_rem.append(x_rem)
 
-    n_non = len(df.loc[df["response"] == "Non_Remission"])
-    n_rem = len(df.loc[df["response"] == "Remission"])
+    n_non = int((df["response"] == "Non_Remission").sum())
+    n_rem = int((df["response"] == "Remission").sum())
 
     # Plot
     plt.figure(figsize=(10, 4.8))
@@ -70,7 +70,7 @@ def main():
     ax.boxplot(data_non, positions=pos_non, widths=0.65, showfliers=False)
     ax.boxplot(data_rem, positions=pos_rem, widths=0.65, showfliers=False)
 
-        # Jitter points with different markers (no forced colors)
+    # Jitter points once per group (keeps to two default colors)
     rng = np.random.default_rng(0)
 
     xs_non, ys_non = [], []
@@ -92,18 +92,10 @@ def main():
     ax.axhline(0, linewidth=1)
     ax.set_ylabel("Post − baseline (paired delta)")
     ax.set_title(f"Discovery: paired deltas by response group (n={n_non} Non_Remission, n={n_rem} Remission)")
+    ax.text(0.5, 1.02, "Paired delta = post − baseline", transform=ax.transAxes, ha="center", va="bottom")
 
     ax.set_xticks(centers)
-    ax.set_xticklabels([LABELS.get(m, m.replace("delta_", "")) for m in metrics], rotation=25, ha="right")
-
-    ax.legend(loc="best")
-
-    ax.axhline(0, linewidth=1)
-    ax.set_ylabel("Post − baseline (paired delta)")
-    ax.set_title(f"Discovery: paired deltas by response group (n={n_non} Non_Remission, n={n_rem} Remission)")
-
-    ax.set_xticks(centers)
-    ax.set_xticklabels([LABELS.get(m, m.replace("delta_", "")) for m in metrics], rotation=25, ha="right")
+    ax.set_xticklabels([LABELS.get(m, m.replace("delta_", "")) for m in metrics], rotation=15, ha="right")
 
     ax.legend(loc="best")
     plt.tight_layout()

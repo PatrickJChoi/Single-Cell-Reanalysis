@@ -19,13 +19,13 @@ This page summarizes the key discovery results and the external validation.
 
 ---
 
-### Figure S1 — Overall paired within-subject changes (all subjects pooled)
+### Figure S1 — MITO/ROS-high change by response (single-metric view)
 
 ![Fig S1: mito/ROS delta](assets/figures/fig1_mito_ros_delta.png)
 
 **Takeaways (discovery):**
-- We quantify **within-subject change** (post − baseline) to reduce between-person variability.
-- The pooled view summarizes the overall direction across all subjects, but can hide subgroup differences.
+- Focused view of the key state: the **MITO/ROS-high fraction** decreases more in **Remission** than **Non_Remission** on average.
+- The spread/outliers highlight patient heterogeneity, motivating the multi-metric view in Figure 1.
 
 ---
 
@@ -64,6 +64,8 @@ This page summarizes the key discovery results and the external validation.
 ---
 
 ### Figure V2 — Validation paired deltas
+
+> Note: In GSE298464 validation, response labels for the paired-delta plot (Fig V2) are inferred (the paired-deltas table lacks an explicit `response` column); see `scripts/make_fig1_validation_gse298464.py` for the mapping logic.
 
 ![Fig V2: validation deltas](assets/figures/figV2_gse298464_mito_ros_delta.png)
 

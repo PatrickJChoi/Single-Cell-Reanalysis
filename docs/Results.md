@@ -66,6 +66,7 @@ This page summarizes the key discovery results and the external validation.
 ### Figure V2 — Validation paired deltas
 
 > Note: In GSE298464 validation, response labels for the paired-delta plot (Fig V2) are inferred (the paired-deltas table lacks an explicit `response` column); see `scripts/make_fig1_validation_gse298464.py` for the mapping logic.
+> See [`scripts/make_fig1_validation_gse298464.py`](../scripts/make_fig1_validation_gse298464.py) for the mapping logic.
 
 ![Fig V2: validation deltas](assets/figures/figV2_gse298464_mito_ros_delta.png)
 

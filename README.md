@@ -26,6 +26,30 @@ Full run (requires discovery inputs; see `docs/Data_Acquisition.md`):
 
 ---
 
+## Docker (recommended for portability)
+
+Build and run the smoke test with no local setup required:
+
+    docker build -t scr .
+    docker run --rm scr
+
+To run the full analysis, mount your local data directory into the container:
+
+    docker run --rm \
+      -v $(pwd)/data:/app/data \
+      -v $(pwd)/results:/app/results \
+      scr python scripts/run_full.py --config configs/full.yaml
+
+To run tests:
+
+    docker run --rm scr python -m pytest tests/
+
+To open an interactive shell inside the container:
+
+    docker run --rm -it scr bash
+
+---
+
 ## Environment setup (recommended)
 
 This repo uses a pinned conda-forge environment.

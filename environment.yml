@@ -12,4 +12,5 @@ dependencies:
   - pyyaml
   - scanpy
   - libblas[build=*openblas]
+  - pytest
 

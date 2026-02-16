@@ -1,0 +1,13 @@
+.git
+.github
+__pycache__
+*.pyc
+*.h5ad
+*.h5ad.gz
+data/
+outputs/
+reports/
+results/tables/*.tsv
+results/figures/*.png
+.ipynb_checkpoints/
+manuscript/
